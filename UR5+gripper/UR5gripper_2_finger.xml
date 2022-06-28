@@ -1,0 +1,477 @@
+<!--
+
+MODEL: Univewrsal Robots UR5 + Robotiq S Model 3 Finger Gripper
+AUTHOR: Andrea Franceschetti @IASLAB Research Group
+UNIVERSITY: University of Padua
+DEPARTMENT: Departement of Information Engineering DEI
+Control Engineering / Automation Engineering
+
+-->
+
+
+<!--Link  MuJoCo modeling: http://www.mujoco.org/book/modeling.html-->
+
+<mujoco model="ur5gripper">
+    <compiler angle="radian"
+              inertiafromgeom="true"
+              texturedir="textures/"
+              meshdir="mesh/visual/"/>
+    <option timestep="2e-3"
+            iterations="100"
+            tolerance="1e-10"
+            impratio="10"
+            collision="all"/>
+    <size njmax="8000" nconmax="4000"/>
+
+    <default>
+        <site rgba="0.8 0.6 0.7 0.3" type="ellipsoid" group="3"/>
+        <geom contype='1' conaffinity='1' condim='4'  margin="1e-3" solref=".01 1" solimp=".99 .99 .01" />
+        <joint armature="0.01" damping=".1"/>
+        <default class="UR5">
+            <joint damping='65'/>
+        </default>
+        <default class="UR5e">
+            <joint damping='45'/>
+        </default>
+        <default class="GRIPPER">
+            <joint damping='5'/>
+        </default>
+    </default>
+
+    <visual>
+        <map fogstart="3" fogend="5" znear="0.05"/>
+        <quality shadowsize="2048"/>
+        <scale framelength="0.1"
+               framewidth="0.005"
+               contactwidth="0.1"
+               contactheight="0.005"
+               forcewidth="0.01"
+               />
+    </visual>
+
+    <!--Assets-->
+    <asset>
+        <!--Meshes-->
+        <mesh name="base"      file="base.stl"     />
+        <mesh name="shoulder"  file="shoulder.stl" />
+        <mesh name="upperarm"  file="upperarm.stl" />
+        <mesh name="forearm"   file="forearm.stl"  />
+        <mesh name="wrist1"    file="wrist1.stl"   />
+        <mesh name="wrist2"    file="wrist2.stl"   />
+        <mesh name="wrist3"    file="wrist3.stl"   />
+        <mesh name="drone"     file="drone.stl"        scale="0.001 0.001 0.001"/>
+        <mesh name="socket"    file="socket.stl"       scale="0.02 0.02 0.02"   />
+
+        <mesh name="robotiq_85_base_link_coarse"  file="robotiq_85_base_link_coarse.STL" />
+        <mesh name="inner_knuckle_coarse"         file="inner_knuckle_coarse.STL"        />
+        <mesh name="inner_finger_coarse"          file="inner_finger_coarse.STL"         />
+        <mesh name="outer_knuckle_coarse"         file="outer_knuckle_coarse.STL"        />
+        <mesh name="outer_finger_coarse"          file="outer_finger_coarse.STL"         />
+        <mesh name="base_link"                    file="base_link.stl"                   />
+
+        <!--Textures-->
+        <texture name="ur5_tex"      type="2d"       builtin="flat"     height="32"  width="32"  rgb1="0.45 0.45 0.45" />
+        <texture name="gripper_tex"  type="2d"       builtin="flat"     height="32"  width="32"  rgb1="0.45 0.45 0.45" rgb2="0 0 0"     />
+        <texture name="floor_tex"    type="2d"       builtin="checker"  height="100" width="100" rgb1=".2 .3 .4"       rgb2=".1 .2 .3"  />
+        <texture name="wood"         type="cube"     file="wood2.png"  />
+        <texture name="metal"        type="cube"     file="metal2.png" />
+        <texture name="recycling"        file="recycling.png"     />
+        <texture name="spare_parts_bin"  file="spare_parts.png"   />
+        <texture name="drone_landing"    file="drone_landing.png" />
+        <texture name="metal4"           file="metal4.png"        />
+        <texture name="air_off"          file="off.png"           />
+        <texture name="air_on"           file="on.png"            />
+
+       <!--Materials-->
+        <material name="ur5_mat"               texture="ur5_tex"          shininess="0.9"  specular="0.75" reflectance="0.3" />
+        <material name="gripper_mat"           texture="gripper_tex"      shininess="0.9"  specular="0.75" reflectance="0.4" />
+        <material name='floor_mat'             texture="floor_tex"        shininess="0.8"  specular="0.7"  reflectance="0.5" texrepeat="10 10" />  
+        <material name="bench_mat"             texture="metal"            shininess="0.1"  specular="0.5"  reflectance="0.2" />
+        <material name="tablecube"             texture="wood"             rgba=".8 .8 .8 1" />
+        <material name="sorbent_bed_cylinder"  texture="metal"            shininess="0.01" specular="0.5"  reflectance="0.1" />
+        <material name="recycling_bin"         texture="recycling"        shininess="0.01" specular="0.5"  reflectance="0.1" />
+        <material name="spare_parts_bin"       texture="spare_parts_bin"  shininess="0.01" specular="0.5"  reflectance="0.1" />
+        <material name="drone_landing"         texture="drone_landing"    shininess="0.01" specular="0.5"  reflectance="0.1" />
+        <material name="metal4"                texture="metal4"           shininess="0.01" specular="0.5"  reflectance="0.2" />
+        <material name="air_off"               texture="air_off"          shininess="0"    specular="1"    reflectance="0"   />
+        <material name="air_on"                texture="air_on"           shininess="0"    specular="1"    reflectance="0"   />
+    </asset>
+
+    <!--Contacts-->
+    <contact>
+        <exclude body1="box_link"        body2="base_link"/>
+        <exclude body1="base_link"       body2="shoulder_link"/>
+        <exclude body1="shoulder_link"   body2="upper_arm_link"/>
+        <exclude body1="upper_arm_link"  body2="forearm_link"/>
+        <exclude body1="forearm_link"    body2="wrist_1_link"/>
+        <exclude body1="wrist_1_link"    body2="wrist_2_link"/>
+        <exclude body1="wrist_2_link"    body2="wrist_3_link"/>
+        <exclude body1="ee_link"         body2="wrist_3_link"/>
+        <exclude body1="box_link"        body2="base1_link"/>
+        <exclude body1="base1_link"      body2="shoulder1_link"/>
+        <exclude body1="shoulder1_link"  body2="upper1_arm_link"/>
+        <exclude body1="upper1_arm_link" body2="forearm1_link"/>
+        <exclude body1="forearm1_link"   body2="wrist1_1_link"/>
+        <exclude body1="wrist1_1_link"   body2="wrist1_2_link"/>
+        <exclude body1="wrist1_2_link"   body2="wrist1_3_link"/>
+        <exclude body1="ee1_link"        body2="wrist1_3_link"/>
+        
+        <exclude body1="air_filter"      body2="socket"/>
+        <exclude body1="air_filter"      body2="base1_link"/>
+        <exclude body1="base1_link"      body2="recycling_bin"/>
+        <exclude body1="base1_link"      body2="recycling_bin_2"/>
+        <exclude body1="base_link"       body2="recycling_bin"/>
+        <exclude body1="base_link"       body2="recycling_bin_2"/>
+    </contact>
+
+
+    <!--MODEL DESCRIPTION-->
+    <worldbody>
+        <!--Lighting-->
+        <light name="light3" mode="targetbody" target="box_link" directional="true"  castshadow="true"  pos="0 0 3" />
+        <light name="light4" mode="targetbody" target="box_link" directional="false" castshadow="false" pos="0 0 3" />
+
+        <!--Cameras-->
+        <camera name="main1" mode="fixed"      target="ee_link"  pos="2 2 2.7" axisangle="2 2 -2 1" />
+        <camera name="drone" mode="targetbody" target="ee2_link" pos="2 2 2"   fovy="45" />
+
+        <!--Bodies-->
+        <body name="table" pos="0 0 0.835">
+            <geom size="1.8 1.2 .03" type="box" material="bench_mat" />
+            <geom size=".04 .04 .44" pos=" 0.46  0.16 -0.4" type="box" material="bench_mat"/>
+            <geom size=".04 .04 .44" pos="-0.46  0.16 -0.4" type="box" material="bench_mat"/>
+            <geom size=".04 .04 .44" pos=" 0.46 -0.16 -0.4" type="box" material="bench_mat"/>
+            <geom size=".04 .04 .44" pos="-0.46 -0.16 -0.4" type="box" material="bench_mat"/>
+        </body>
+
+        <body name="air_on" pos="0 1.18 1.8">
+            <geom size="0.3 0.01 0.3" type="box" material="air_on" />
+        </body>
+        <body name="air_off" pos="0 1.2 1.8">
+            <geom size="0.3 0.01 0.3" type="box" material="air_off" />
+        </body>
+        <geom name='floor' material="floor_mat" pos='0 0 0' size='2.5 2.5 0.1'  type='plane' /> <!--floor-->
+        <body name="box_link" pos="0 0 0.435">
+            <geom size="1.8 1.0 0.01" pos="0 1.2 1.235" axisangle= "-60000 0 0 300" type="box" material="metal4"/> <!--background-->
+            <geom size="0.01 1.0 1.2" pos="1.8 0 1.235" axisangle= "-60000 0 0 300" type="box" material="metal4"/> <!--background-->
+
+            <geom size="1 0.09 0.035" pos="0 0 0.435" type="box" material="gripper_mat"/> <!--slider-->
+            <geom size="0.3 0.3 0.0025" pos="1.4 0.8 0.43" type="box" material="drone_landing"/> <!--free flyer home location-->
+
+            <body name="air_filter" pos="0 1.2 1">
+                <geom name="downstream_support_1" pos="0.33 -0.605 -0.2"  material="sorbent_bed_cylinder" size="0.12 0.02 0.0025" type="box" />
+                <geom name="downstream_support_2" pos="-0.33 -0.605 -0.2" material="sorbent_bed_cylinder" size="0.12 0.02 0.0025" type="box" />
+                <geom name="wall_converter_1"     pos="-0.2 -0.6 -0.07"   material="sorbent_bed_cylinder" size="0.03 0.03 0.12"   type="box" />
+                <geom name="wall_converter_2"     pos="0.2 -0.6 -0.07"    material="sorbent_bed_cylinder" size="0.03 0.03 0.12"   type="box" />
+                <geom name="wall_pipe_1"          pos="-0.2 -0.28 0"      axisangle="1 0 0 1.57" material="sorbent_bed_cylinder" size="0.03 0.3 0.03"    type="cylinder" />
+                <geom name="wall_pipe_2"          pos="0.2 -0.28 0"       axisangle="1 0 0 1.57" material="sorbent_bed_cylinder" size="0.03 0.3 0.03"    type="cylinder" />
+                <geom name="wall_pipe_3"          pos="-0.19 -0.6 0"      axisangle="0 1 0 1.57" material="sorbent_bed_cylinder" size="0.015 0.03 0.015" type="cylinder" />
+                <geom name="wall_pipe_4"          pos="0.19 -0.6 0"       axisangle="0 1 0 1.57" material="sorbent_bed_cylinder" size="0.015 0.03 0.015" type="cylinder" />
+                <geom name="wall_pipe_5"          pos="-0.2 -0.7 -0.11"   axisangle="1 0 0 1.57" material="sorbent_bed_cylinder" size="0.015 0.12 0.015" type="cylinder" />
+                <geom name="wall_pipe_6"          pos="0.2 -0.7 -0.11"    axisangle="1 0 0 1.57" material="sorbent_bed_cylinder" size="0.015 0.12 0.015" type="cylinder" />
+                <geom name="wall_pipe_7"          pos="0.35 -0.28 -0.16"  axisangle="1 0 0 1.57" material="sorbent_bed_cylinder" size="0.02 0.25 0.02"   type="cylinder" />
+                <geom name="wall_pipe_8"          pos="-0.35 -0.28 -0.16" axisangle="1 0 0 1.57" material="sorbent_bed_cylinder" size="0.02 0.25 0.02"   type="cylinder" />
+            </body>
+        
+            <body name="sorbent_pipe_1" pos="-0.35 0.595 0.85" axisangle="1 0 0 1.57">
+                <joint armature="0" axis="1 0 0" damping="5" limited="true" name="sorbent_pipe_1_x" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+                <joint armature="0" axis="0 1 0" damping="5" limited="true" name="sorbent_pipe_1_y" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+                <joint armature="0" axis="0 0 1" damping="5" limited="true" name="sorbent_pipe_1_z" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+                <geom name="sorbent_pipe_1" pos="0 0 0" material="sorbent_bed_cylinder" size="0.03 0.06 0.03" type="cylinder"/>
+            </body>
+            <body name="sorbent_pipe_2" pos="0.35 0.595 0.85" axisangle="1 0 0 1.57">
+                <joint armature="0" axis="1 0 0" damping="5" frictionloss="0" limited="true" name="sorbent_pipe_2_x" pos="0 0 0" range="-5. 5." stiffness="1" type="slide"/>
+                <joint armature="0" axis="0 1 0" damping="5" frictionloss="0" limited="true" name="sorbent_pipe_2_y" pos="0 0 0" range="-5. 5." stiffness="1" type="slide"/>
+                <joint armature="0" axis="0 0 1" damping="5" frictionloss="0" limited="true" name="sorbent_pipe_2_z" pos="0 0 0" range="-5. 5." stiffness="1" type="slide"/>
+                <geom name="sorbent_pipe_2" pos="0 0 0" material="sorbent_bed_cylinder" size="0.03 0.06 0.03" type="cylinder"/>
+            </body>
+
+            <body name="filter_support" pos="0 0.6 0.96">
+                <geom name="filter_support_box" pos="0 0 0" material="sorbent_bed_cylinder" size="0.2 0.03 0.0025" type="box"/>
+            </body>
+
+            <!--UR5A-->
+            <inertial pos="0 0 0" mass="1000" diaginertia="0 0 0" />
+            <body name="base_link" pos="-0.8 0 0.475">
+                <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="4" diaginertia="0.0072 0.00443333 0.00443333" />
+                <joint name="robot1_sliding_base_joint" pos="0 0 0" axis="1 0 0" frictionloss="500" damping="50" type="slide" limited="true" range="-1 1" />
+                <geom type="mesh"  mesh="base" material="ur5_mat"/>
+                <body name="shoulder_link" pos="0 0 0.089159">
+                    <inertial pos="0 0 0" mass="3.7" diaginertia="0.0102675 0.0102675 0.00666" />
+                    <joint name="shoulder_pan_joint" class="UR5" pos="0 0 0" axis="0 0 1" limited="true" range="-3.14159 3.14159" />
+                    <geom type="mesh"  mesh="shoulder" material="ur5_mat"/>
+                    <body name="upper_arm_link" pos="0 0.13585 0" quat="0.707107 0 0.707107 0">
+                        <inertial pos="0 0 0.28" mass="8.393" diaginertia="0.226891 0.226891 0.0151074" />
+                        <joint name="shoulder_lift_joint" class="UR5" pos="0 0 0" axis="0 1 0" limited="true" range="-3.14159 3.14159" /> <!--Range= -3.14159 0 before aaron-->
+                        <geom type="mesh"  mesh="upperarm" material="ur5_mat"/>
+                        <body name="forearm_link" pos="0 -0.1197 0.425">
+                            <inertial pos="0 0 0.25" mass="2.275" diaginertia="0.0494433 0.0494433 0.004095" />
+                            <joint name="elbow_joint" class="UR5" pos="0 0 0" axis="0 1 0" limited="true" range="-3.14159 3.14159" />
+                            <geom type="mesh"  mesh="forearm" material="ur5_mat"/>
+                            <body name="wrist_1_link" pos="0 0 0.39225" quat="0.707107 0 0.707107 0">
+                                <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="1.219" diaginertia="0.21942 0.111173 0.111173" />
+                                <joint name="wrist_1_joint" class="UR5e" pos="0 0 0" axis="0 1 0" limited="true" range="-3.14159 3.14159" />
+                                <geom type="mesh"  mesh="wrist1" material="ur5_mat"/>
+                                <body name="wrist_2_link" pos="0 0.093 0">
+                                    <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="1.219" diaginertia="0.21942 0.111173 0.111173" />
+                                    <joint name="wrist_2_joint" class="UR5e" pos="0 0 0" axis="0 0 1" limited="true" range="-3.14159 3.14159" />
+                                    <geom type="mesh"  mesh="wrist2" material="ur5_mat"/>
+                                    <body name="wrist_3_link" pos="0 0 0.09465">
+                                        <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.1879" diaginertia="0.033822 0.0171365 0.0171365" />
+                                        <joint name="wrist_3_joint" class="UR5e" pos="0 0 0" axis="0 1 0" limited="false" range="-300.14159 300.14159" />
+                                        <geom type="mesh"  mesh="wrist3" material="ur5_mat"/>
+                                        <body name="ee_link" pos="0 0.0823 0" quat="0.707107 0 0 0.707107">
+                                            <inertial pos="-0.01 0 0" mass="0.001" diaginertia="1.66667e-08 1.66667e-08 1.66667e-08" />
+                                            <geom size="0.005 0.005 0.005" pos="-0.01 0 0" type="box" />
+                                        <!--GRIPPER-->
+                                            <body name="socket" pos="0 0 0" axisangle="0 1 0 1.57">
+                                                <inertial pos="0.0170975 -3.93809e-10 0.0224918"   quat="0.947655 0 -0.319297 0" mass="0.0110931" diaginertia="5.59353e-06 3.96549e-06 1.88108e-06" />
+                                                <geom type="mesh" rgba="0.1 0.1 0.1 1" friction="0.8 0.8 0.8" mesh="socket" />
+                                                 <joint name="base_to_lik" class="GRIPPER" pos="0 0 0" axis="0 1 0" limited="false" range="-1 1" />
+                                            </body>
+                                        </body>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+            <!--UR5B-->
+            <body name="base1_link" pos="0.8 0 0.475">
+                <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="4" diaginertia="0.0072 0.00443333 0.00443333" />
+                <joint name="robot2_sliding_base_joint" pos="0 0 0" axis="1 0 0" frictionloss="500" damping="50" type="slide" limited="true" range="-1 1" />
+                <geom type="mesh"  mesh="base" material="ur5_mat"/>
+                <body name="shoulder1_link" pos="0 0 0.089159">
+                    <inertial pos="0 0 0" mass="3.7" diaginertia="0.0102675 0.0102675 0.00666" />
+                    <joint name="shoulder1_pan_joint" class="UR5" pos="0 0 0" axis="0 0 1" limited="true" range="-3.14159 3.14159" />
+                    <geom type="mesh"  mesh="shoulder" material="ur5_mat"/>
+                    <body name="upper1_arm_link" pos="0 0.13585 0" quat="0.707107 0 0.707107 0">
+                        <inertial pos="0 0 0.28" mass="8.393" diaginertia="0.226891 0.226891 0.0151074" />
+                        <joint name="shoulder1_lift_joint" class="UR5" pos="0 0 0" axis="0 1 0" limited="true" range="-3.14159 0" /> <!--Range= -3.14159 3.14159-->
+                        <geom type="mesh"  mesh="upperarm" material="ur5_mat"/>
+                        <body name="forearm1_link" pos="0 -0.1197 0.425">
+                            <inertial pos="0 0 0.25" mass="2.275" diaginertia="0.0494433 0.0494433 0.004095" />
+                            <joint name="elbow1_joint" class="UR5" pos="0 0 0" axis="0 1 0" limited="true" range="-3.14159 3.14159" />
+                            <geom type="mesh"  mesh="forearm" material="ur5_mat"/>
+                            <body name="wrist1_1_link" pos="0 0 0.39225" quat="0.707107 0 0.707107 0">
+                                <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="1.219" diaginertia="0.21942 0.111173 0.111173" />
+                                <joint name="wrist1_1_joint" class="UR5e" pos="0 0 0" axis="0 1 0" limited="true" range="-3.14159 3.14159" />
+                                <geom type="mesh"  mesh="wrist1" material="ur5_mat"/>
+                                <body name="wrist1_2_link" pos="0 0.093 0">
+                                    <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="1.219" diaginertia="0.21942 0.111173 0.111173" />
+                                    <joint name="wrist1_2_joint" class="UR5e" pos="0 0 0" axis="0 0 1" limited="true" range="-3.14159 3.14159" />
+                                    <geom type="mesh"  mesh="wrist2" material="ur5_mat"/>
+                                    <body name="wrist1_3_link" pos="0 0 0.09465">
+                                        <inertial pos="0 0 0" quat="0.5 0.5 -0.5 0.5" mass="0.1879" diaginertia="0.033822 0.0171365 0.0171365" />
+                                        <joint name="wrist1_3_joint" class="UR5e" pos="0 0 0" axis="0 1 0" limited="false" range="-3.14159 3.14159" />
+                                        <geom type="mesh"  mesh="wrist3" material="ur5_mat"/>
+                                        <body name="ee1_link" pos="0 0.0823 0" quat="0.707107 0 0 0.707107">
+                                            <inertial pos="-0.01 0 0" mass="0.001" diaginertia="1.66667e-08 1.66667e-08 1.66667e-08" />
+                                            <geom size="0.005 0.005 0.005" pos="-0.01 0 0" type="box" />
+                                            <!--GRIPPER-->
+                                             <!-- <joint name="ee_to_base" pos="0 0 0" axis="1 0 0" limited="true" range="0 0" /> -->
+                                            <body name="robotiq1_85_base_link" pos="0 0 0" quat="0.5 0.5 0.5 0.5 ">
+                                                <inertial pos="0.00021987 -2.3546e-10 0.030163"  quat="0.707058 0.00723369 0.00723345 0.707081" mass="0.30915" diaginertia="0.00030737 0.000289758 0.000199102" />
+                                                <geom type="mesh" rgba="0.1 0.1 0.1 1" friction="0.8 0.8 0.8" mesh="robotiq_85_base_link_coarse" />
+                                      
+                                                <body name="left1_inner_knuckle" pos="0.0127 0 0.0693075">
+                                                    <inertial pos="0.0170975 -3.93809e-10 0.0224918"   quat="0.947655 0 -0.319297 0" mass="0.0110931" diaginertia="5.59353e-06 3.96549e-06 1.88108e-06" />
+                                                    <geom type="mesh" rgba="0.1 0.1 0.1 1" friction="0.8 0.8 0.8" mesh="inner_knuckle_coarse" />
+                                                    <joint name="base1_to_lik" class="GRIPPER" pos="0 0 0" axis="0 1 0" limited="true" range="-1 1" />
+
+                                                    <body name="left1_inner_finger" pos="0.0345853 0 0.045497" >
+                                                        <inertial pos="0.00602756 0 0.00669926"  quat="0.699065 0.106339 0.106339 0.699065" mass="0.00724255" diaginertia="1.70064e-06 1.58577e-06 3.69621e-07" />
+                                                        <geom type="mesh" rgba="0.1 0.1 0.1 1" friction="0.8 0.8 0.8" mesh="inner_finger_coarse" />
+                                                    </body>
+                                                </body>
+                                                <body name="right1_inner_knuckle" pos="-0.0127 0 0.0693075" quat="0 0 0 1">
+                                                    <inertial pos="0.0168606 3.93808e-10 0.02267"  quat="0.949317 0 -0.314322 0" mass="0.0110931" diaginertia="5.59353e-06 3.96549e-06 1.88108e-06" />
+                                                    <geom type="mesh" rgba="0.1 0.1 0.1 1" friction="0.8 0.8 0.8" mesh="inner_knuckle_coarse" />
+                                                    <joint name="base1_to_rik" class="GRIPPER" pos="0 0 0" axis="0 1 0" limited="true" range="-1 1" />
+
+                                                    <body name="right1_inner_finger" pos="0.034106 0 0.0458574">
+                                                        <inertial pos="0.00602756 0 0.00669926"  quat="0.699065 0.106339 0.106339 0.699065" mass="0.00724255" diaginertia="1.70064e-06 1.58577e-06 3.69621e-07" />
+                                                        <geom type="mesh" rgba="0.1 0.1 0.1 1" friction="0.8 0.8 0.8" mesh="inner_finger_coarse" />
+                                                    </body>
+                                                </body>
+                                            </body>
+                                        </body>
+                                    </body>
+                                </body>
+                            </body>
+                        </body>
+                    </body>
+                </body>
+            </body>
+        </body>
+        <!--Free Flyer-->
+        <body name="flyer_base" pos="1.4 0.8 0.7">
+            <geom  type="mesh" rgba="0.1 0.1 0.1 1" friction="0.8 0.8 0.8" mesh="drone" pos="0 0 -0.095"/>
+            <joint name="robot1_flying_base_joint_Z" pos="0 0 0" axis="0 0 1" frictionloss="500" damping="50" type="slide" limited="true" range="-10 10" />
+            <joint name="robot1_flying_base_joint_X" pos="0 0 0" axis="1 0 0" frictionloss="500" damping="50" type="slide" limited="true" range="-10 10" />
+            <joint name="robot1_flying_base_joint_Y" pos="0 0 0" axis="0 1 0" frictionloss="500" damping="50" type="slide" limited="true" range="-10 10" />
+        
+            <body name="ee2_link" pos="0 0 -0.1" quat="0.707107 0 0 0.707107" axisangle="0 60 0 1.57">
+                <inertial pos="-0.01 0 0" mass="0.001" diaginertia="1.66667e-08 1.66667e-08 1.66667e-08" />
+                <geom size="0.005 0.005 0.005" pos="-0.01 0 0" type="box" />
+                
+                <!--GRIPPER-->
+                <body name="robotiq2_85_base_link" pos="0 0 0" quat="0.5 0.5 0.5 0.5 ">
+                    <inertial pos="0.00021987 -2.3546e-10 0.030163"  quat="0.707058 0.00723369 0.00723345 0.707081" mass="0.30915" diaginertia="0.00030737 0.000289758 0.000199102" />
+                    <geom type="mesh" rgba="0.1 0.1 0.1 1" friction="0.8 0.8 0.8" mesh="robotiq_85_base_link_coarse" />
+              
+                    <body name="left2_inner_knuckle" pos="0.0127 0 0.0693075">
+                        <inertial pos="0.0170975 -3.93809e-10 0.0224918"   quat="0.947655 0 -0.319297 0" mass="0.0110931" diaginertia="5.59353e-06 3.96549e-06 1.88108e-06" />
+                        <geom type="mesh" rgba="0.1 0.1 0.1 1" friction="0.8 0.8 0.8" mesh="inner_knuckle_coarse" />
+                        <joint name="base2_to_lik" class="GRIPPER" pos="0 0 0" axis="0 1 0" limited="true" range="-1 1" />
+
+                        <body name="left2_inner_finger" pos="0.0345853 0 0.045497" >
+                            <inertial pos="0.00602756 0 0.00669926"  quat="0.699065 0.106339 0.106339 0.699065" mass="0.00724255" diaginertia="1.70064e-06 1.58577e-06 3.69621e-07" />
+                            <geom type="mesh" rgba="0.1 0.1 0.1 1" friction="0.8 0.8 0.8" mesh="inner_finger_coarse" />
+                        </body>
+                    </body>
+
+                    <body name="right2_inner_knuckle" pos="-0.0127 0 0.0693075" quat="0 0 0 1">
+                        <inertial pos="0.0168606 3.93808e-10 0.02267"  quat="0.949317 0 -0.314322 0" mass="0.0110931" diaginertia="5.59353e-06 3.96549e-06 1.88108e-06" />
+                        <geom type="mesh" rgba="0.1 0.1 0.1 1" friction="0.8 0.8 0.8" mesh="inner_knuckle_coarse" />
+                        <joint name="base2_to_rik" class="GRIPPER" pos="0 0 0" axis="0 1 0" limited="true" range="-1 1" />
+                        <body name="right2_inner_finger" pos="0.034106 0 0.0458574">
+                            <inertial pos="0.00602756 0 0.00669926"  quat="0.699065 0.106339 0.106339 0.699065" mass="0.00724255" diaginertia="1.70064e-06 1.58577e-06 3.69621e-07" />
+                            <geom type="mesh" rgba="0.1 0.1 0.1 1" friction="0.8 0.8 0.8" mesh="inner_finger_coarse" />
+                        </body>
+                    </body>
+                </body> 
+            </body>
+        </body>
+    
+        <body name="cyclinder_1" pos="0 0.6 1.5" axisangle="0 1 0 1.57">
+            <inertial pos="-0.15 0.89 0.9" mass="0.0" />
+            <joint armature="0" axis="1 0 0" damping="5" limited="true" name="cyclinder_1_x" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" axis="0 1 0" damping="5" limited="true" name="cyclinder_1_y" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" axis="0 0 1" damping="5" limited="true" name="cyclinder_1_z" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" damping="4" name="cyclinder_1_rot" pos="0 0 0" stiffness="0" type="ball"/>
+            <geom name="cyclinder_1" pos="0 0 0" material="sorbent_bed_cylinder" size="0.04 0.15 0.05" type="cylinder"/>
+        </body>
+        
+        <body name="cylinder_box" pos="0.7 -0.82 0.89" axisangle="0 1 0 1.57">
+            <geom name="cylinder_box_1" pos="0 0.1 0" material="tablecube" size="0.03 0.007 0.6" type="box"/>
+            <geom name="cylinder_box_2" pos="0 -0.1 0" material="tablecube" size="0.03 0.007 0.6" type="box"/>
+            <geom name="cylinder_box_3" pos="0 0 0.6" material="tablecube" size="0.03 0.1 0.007" type="box"/>
+            <geom name="cylinder_box_4" pos="0 0 -0.6" material="tablecube" size="0.03 0.1 0.007" type="box"/>
+        </body>
+        
+        <body name="box_3" pos="0.35 -0.8 1" axisangle="0 1 0 1.57">
+            <joint armature="0" axis="1 0 0" damping="10" limited="true" name="box_3_x" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" axis="0 1 0" damping="10" limited="true" name="box_3_y" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" axis="0 0 1" damping="10" limited="true" name="box_3_z" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" damping="0" name="box_3_rot" pos="0 0 0" stiffness="0" type="ball"/>
+            <geom name="box_3" pos="0 0 0" material="sorbent_bed_cylinder" size="0.04 0.15 0.05" type="cylinder"/>
+        </body>
+
+        <body name="box_5" pos="0.7 -0.8 1" axisangle="0 1 0 1.57">
+            <joint armature="0" axis="1 0 0" damping="10" limited="true" name="box_5_x" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" axis="0 1 0" damping="10" limited="true" name="box_5_y" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" axis="0 0 1" damping="10" limited="true" name="box_5_z" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" damping="0" name="box_5_rot" pos="0 0 0" stiffness="0" type="ball"/>
+            <geom name="box_5" pos="0 0 0" material="sorbent_bed_cylinder" size="0.04 0.15 0.05" type="cylinder"/>
+        </body>
+        
+        <body name="box_8" pos="1.05 -0.8 1" axisangle="0 1 0 1.57">
+            <joint armature="0" axis="1 0 0" damping="10" limited="true" name="box_8_x" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" axis="0 1 0" damping="10" limited="true" name="box_8_y" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" axis="0 0 1" damping="10" limited="true" name="box_8_z" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" damping="0" name="box_8_rot" pos="0 0 0" stiffness="0" type="ball"/>
+            <geom name="box_8" pos="0 0 0" material="sorbent_bed_cylinder" size="0.04 0.15 0.05" type="cylinder"/>
+        </body>
+        
+        <!--Recyling Bin-->
+        <body name="recycling_bin" pos="1.4 0 0.95" axisangle="0 1 0 1.57">
+            <geom name="recycling_bin_1" pos="0 0.15 0"  material="recycling_bin" size="0.1 0.007 0.2" type="box"/>
+            <geom name="recycling_bin_2" pos="0 -0.15 0" material="recycling_bin" size="0.1 0.007 0.2" type="box"/>
+            <geom name="recycling_bin_3" pos="0 0 0.2"   material="recycling_bin" size="0.1 0.15 0.007" type="box"/>
+            <geom name="recycling_bin_4" pos="0 0 -0.2"  material="recycling_bin" size="0.1 0.15 0.007" type="box"/>
+        </body>
+        
+        <body name="recycling_bin_2" pos="-1.4 -0.2 0.95" axisangle="0 1 0 1.57">
+            <geom name="recycling_bin_2_1" pos="0 0.1 0"  material="recycling_bin" size="0.1 0.007 0.1" type="box"/>
+            <geom name="recycling_bin_2_2" pos="0 -0.1 0" material="recycling_bin" size="0.1 0.007 0.1" type="box"/>
+            <geom name="recycling_bin_2_3" pos="0 0 0.1"  material="recycling_bin" size="0.1 0.1 0.007" type="box"/>
+            <geom name="recycling_bin_2_4" pos="0 0 -0.1" material="recycling_bin" size="0.1 0.1 0.007" type="box"/>
+
+        </body>
+        
+        <!--Spare Parts Bin-->
+        <body name="spare_bin" pos="1.4 -0.41 0.9" axisangle="0 1 0 1.57">
+            <geom name="spare_bin_1" pos="0 0.1 0"  material="spare_parts_bin" size="0.03 0.007 0.1" type="box"/>
+            <geom name="spare_bin_2" pos="0 -0.1 0" material="spare_parts_bin" size="0.03 0.007 0.1" type="box"/>
+            <geom name="spare_bin_3" pos="0 0 0.1"  material="spare_parts_bin" size="0.03 0.1 0.007" type="box"/>
+            <geom name="spare_bin_4" pos="0 0 -0.1" material="spare_parts_bin" size="0.03 0.1 0.007" type="box"/>
+            <joint armature="0" axis="1 0 0" damping="10" limited="true" name="spare_bin_x" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" axis="0 1 0" damping="10" limited="true" name="spare_bin_y" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" axis="0 0 1" damping="10" limited="true" name="spare_bin_z" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" damping="0" name="spare_bin_rot" pos="0 0 0" stiffness="0" type="ball"/>
+        </body>
+        
+        <body name="spare_bin_2" pos="-1.4 -0.6 0.95" axisangle="0 1 0 1.57">
+            <geom name="spare_bin_2_1" pos="0 0.1 0"  material="spare_parts_bin" size="0.1 0.007 0.1" type="box"/>
+            <geom name="spare_bin_2_2" pos="0 -0.1 0" material="spare_parts_bin" size="0.1 0.007 0.1" type="box"/>
+            <geom name="spare_bin_2_3" pos="0 0 0.1"  material="spare_parts_bin" size="0.1 0.1 0.007" type="box"/>
+            <geom name="spare_bin_2_4" pos="0 0 -0.1" material="spare_parts_bin" size="0.1 0.1 0.007" type="box"/>
+            <joint armature="0" axis="1 0 0" damping="10" limited="true" name="spare_bin_2_x" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" axis="0 1 0" damping="10" limited="true" name="spare_bin_2_y" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" axis="0 0 1" damping="10" limited="true" name="spare_bin_2_z" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" damping="0" name="spare_bin_2_rot" pos="0 0 0" stiffness="0" type="ball"/>
+        </body>
+
+        <body name="sorbent_pipe_3" pos="1.4 -0.41 0.95" axisangle="1 0 0 1.57">
+            <joint armature="0" axis="1 0 0" damping="5" limited="true" name="sorbent_pipe_3_x" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" axis="0 1 0" damping="5" limited="true" name="sorbent_pipe_3_y" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <joint armature="0" axis="0 0 1" damping="5" limited="true" name="sorbent_pipe_3_z" pos="0 0 0" range="-5. 5." stiffness="0" type="slide"/>
+            <geom name="sorbent_pipe_3" pos="0 0 0" material="sorbent_bed_cylinder" size="0.03 0.06 0.03" type="cylinder"/>
+        </body>
+    </worldbody>
+    
+    <equality>
+        <weld  name="filter_to_converter_1" body1="air_filter"    body2="filter_support" relpose="-0.3 0.9 1 0 0 0 0"/>
+        <weld  name="filter_to_converter_2" body1="air_filter"    body2="filter_support" relpose="0.3 0.9 1 0 0 0 0"/>
+        <weld  name="recycling"             body1="recycling_bin" body2="table"          relpose="1.4 -0.25 0.95 0 0 0 0"/>
+        <weld  name="spare_parts"           body1="spare_bin"     body2="table"          relpose="1.4 -0.55 0.95 0 0 0 0"/>
+
+        <joint name="fingers1" joint1="base1_to_rik" joint2="base1_to_lik" polycoef="0 1 0 0 0"/>
+        <joint name="fingers2" joint1="base2_to_rik" joint2="base2_to_lik" polycoef="0 1 0 0 0"/>
+    </equality>
+
+
+    <!--ACTUATORS-->
+    <actuator>
+        <!--UR5A-->
+        <motor name='shoulder_pan_T'   ctrllimited="true" ctrlrange="-2 2"   joint='shoulder_pan_joint'   gear="101"/> <!--range -150 150-->
+        <motor name='shoulder_lift_T'  ctrllimited="true" ctrlrange="-2 2"   joint='shoulder_lift_joint'  gear="101"/>
+        <motor name='forearm_T'        ctrllimited="true" ctrlrange="-2 2"   joint='elbow_joint'          gear="101" />
+        <motor name='wrist_1_T'        ctrllimited="true" ctrlrange="-1 1"   joint='wrist_1_joint'        gear="101"/>  <!--range -28 28-->
+        <motor name='wrist_2_T'        ctrllimited="true" ctrlrange="-1 1"   joint='wrist_2_joint'        gear="101"/>
+        <motor name='wrist_3_T'        ctrllimited="true" ctrlrange="-1 1"   joint='wrist_3_joint'        gear="101"/>
+        <motor name='gripper_motor'    ctrllimited="true" ctrlrange="-1 1"   joint='base_to_lik'          gear="101"/>
+        
+        <motor name='Slider'           ctrllimited="true" ctrlrange="-8 8"   joint='robot1_sliding_base_joint'  gear="101"/>
+
+        <!--UR5B-->
+        <motor name='shoulder1_pan_T'  ctrllimited="true" ctrlrange="-2 2"   joint='shoulder1_pan_joint'  gear="101"/> <!--range -150 150-->
+        <motor name='shoulder1_lift_T' ctrllimited="true" ctrlrange="-2 2"   joint='shoulder1_lift_joint' gear="101"/>
+        <motor name='forearm1_T'       ctrllimited="true" ctrlrange="-2 2"   joint='elbow1_joint'         gear="101" />
+        <motor name='wrist1_1_T'       ctrllimited="true" ctrlrange="-1 1"   joint='wrist1_1_joint'       gear="101"/>  <!--range -28 28-->
+        <motor name='wrist1_2_T'       ctrllimited="true" ctrlrange="-1 1"   joint='wrist1_2_joint'       gear="101"/>
+        <motor name='wrist1_3_T'       ctrllimited="true" ctrlrange="-1 1"   joint='wrist1_3_joint'       gear="101"/>
+        <motor name='gripper1_motor'   ctrllimited="true" ctrlrange="-1 1"   joint='base1_to_lik'         gear="101"/>
+        
+        <motor name='Slider1'          ctrllimited="true" ctrlrange="-8 8"   joint='robot2_sliding_base_joint'  gear="101"/>
+
+        <!--Free Flyer-->
+        <motor name='Flyer_Z'          ctrllimited="true" ctrlrange="-40 40" joint='robot1_flying_base_joint_Z' gear="101"/>
+        <motor name='Flyer_Y'          ctrllimited="true" ctrlrange="-40 40" joint='robot1_flying_base_joint_Y' gear="101"/>
+        <motor name='Flyer_X'          ctrllimited="true" ctrlrange="-40 40" joint='robot1_flying_base_joint_X' gear="101"/>
+        <motor name='gripper2_motor'   ctrllimited="true" ctrlrange="-1 1"   joint='base2_to_lik'               gear="101"/>
+    </actuator>
+</mujoco>
+

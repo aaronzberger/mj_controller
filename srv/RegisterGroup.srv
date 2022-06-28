@@ -1,0 +1,7 @@
+string group
+uint16 num_motors
+string velocity_topic
+---
+bool success
+string position_topic
+uint16[] ids
