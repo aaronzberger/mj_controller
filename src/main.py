@@ -1,15 +1,15 @@
+#!/usr/bin/python3
+
 import rospy
 import os
 from pathlib import Path
 import mujoco_py as mp
 from termcolor import colored
-import ikpy
-import ikpy.chain
 import rospkg
 from mj_controller.srv import RegisterGroup, RegisterGroupResponse
 import json
 from std_msgs.msg import Float64MultiArray
-from std_srvs.srv import Empty, EmptyResponse
+from std_srvs.srv import Trigger, TriggerResponse
 
 
 POSITIONS_TOPIC = '/actuator_positions'
@@ -20,25 +20,25 @@ class MJ_Controller():
     def __init__(cls):
         path = os.path.realpath(__file__)
         path = str(Path(path).parent.parent.parent)
-        cls.model = mp.load_model_from_path(os.join(
-            rospkg.RosPack().get_path('mj_controller'), 'UR5+gripper' + 'UR5gripper_2_finger.xml'))
 
-        cls.ee_chain = ikpy.chain.Chain.from_urdf_file(os.join(
-            rospkg.RosPack().get_path('mj_controller'), 'UR5+gripper', 'ur5.urdf'))
+        print(colored('Loading UR5 model...', color='yellow'), end='')
+        cls.model = mp.load_model_from_path(os.path.join(
+            rospkg.RosPack().get_path('mj_controller'), 'UR5+gripper', 'UR5gripper_2_finger.xml'))
+        print(colored('LOADED', color='green'))
 
-        cls.motor_registration_service = rospy.Service('register_motor_group', RegisterGroup, cls.register_motor_group)
-        cls.start_sim_service = rospy.Service('start_sim', Empty, cls.start_sim)
-
-        cls.actuator_ids = json.load(os.path.join(
-            rospkg.RosPack().get_path('mj_controller'), 'actuators.json'))
+        cls.actuator_ids = json.load(open(os.path.join(
+            rospkg.RosPack().get_path('mj_controller'), 'actuators.json'), 'r'))
         cls.motor_group_subs = []
 
-        rospy.Timer(rospy.Duration(secs=0.01), cls.sim_step)
+        # Always create the services at the end so all necessary variables exist when they are called
+        cls.motor_registration_service = rospy.Service('register_motor_group', RegisterGroup, cls.register_motor_group)
+        cls.start_sim_service = rospy.Service('start_sim', Trigger, cls.start_sim)
 
     @classmethod
     def handle_update(cls, data, ids):
         # Set the actuator velocities to the desired velocities from the controllers
-        cls.control[ids] = data.data
+        for id, pos in zip(ids, data.data):
+            cls.control[id] = pos
 
     @classmethod
     def register_motor_group(cls, req):
@@ -51,10 +51,14 @@ class MJ_Controller():
             rospy.Subscriber(
                 req.velocity_topic, Float64MultiArray, callback=cls.handle_update, callback_args=motor_ids))
 
+        print(colored('Registered subsystem {} to the simulation'.format(req.group), color='cyan'))
+
         return RegisterGroupResponse(success=True, position_topic=POSITIONS_TOPIC, ids=motor_ids)
 
     @classmethod
-    def start_sim(cls):
+    def start_sim(cls, _):
+        print(colored('Starting simulation... ', color='yellow'), end='')
+
         assert len(cls.motor_group_subs) > 0, 'Simulation started with no actuators registered'
         cls.sim = mp.MjSim(cls.model)
         cls.viewer = mp.MjViewer(cls.sim)
@@ -71,7 +75,12 @@ class MJ_Controller():
 
         cls.pub_positions = rospy.Publisher(POSITIONS_TOPIC, Float64MultiArray, queue_size=1)
 
-        return EmptyResponse
+        # Start executing the planned actions
+        rospy.Timer(rospy.Duration(secs=0.01), cls.sim_step)
+
+        print('\r' + colored('Starting simulation... ', color='yellow'), end='')
+        print(colored('STARTED', color='green'))
+        return TriggerResponse(success=True)
 
     @classmethod
     def sim_step(cls, _: rospy.timer.TimerEvent):
