@@ -1,16 +1,17 @@
 #!/usr/bin/python3
 
-import rospy
-import os
-from pathlib import Path
-import mujoco_py as mp
-from termcolor import colored
-import rospkg
-from mj_controller.srv import RegisterGroup, RegisterGroupResponse
 import json
+import os
+import sys
+from pathlib import Path
+
+import mujoco_py as mp
+import rospkg
+import rospy
+from mj_controller.srv import RegisterGroup, RegisterGroupResponse
 from std_msgs.msg import Float64MultiArray
 from std_srvs.srv import Trigger, TriggerResponse
-
+from termcolor import colored
 
 POSITIONS_TOPIC = '/actuator_positions'
 
@@ -33,6 +34,8 @@ class MJ_Controller():
         # Always create the services at the end so all necessary variables exist when they are called
         cls.motor_registration_service = rospy.Service('register_motor_group', RegisterGroup, cls.register_motor_group)
         cls.start_sim_service = rospy.Service('start_sim', Trigger, cls.start_sim)
+
+        print('Waiting for subsystems to register...')
 
     @classmethod
     def handle_update(cls, data, ids):
@@ -78,7 +81,8 @@ class MJ_Controller():
         # Start executing the planned actions
         rospy.Timer(rospy.Duration(secs=0.01), cls.sim_step)
 
-        print('\r' + colored('Starting simulation... ', color='yellow'), end='')
+        sys.stdout.write('\033[F\033[K')
+        print('\r' + colored('Starting simulation... ', color='yellow'), end='', flush=True)
         print(colored('STARTED', color='green'))
         return TriggerResponse(success=True)
 

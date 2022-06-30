@@ -306,7 +306,7 @@ Control Engineering / Automation Engineering
             </body>
         </body>
         <!--Free Flyer-->
-        <body name="flyer_base" pos="1.4 0.8 0.7">
+        <body name="flyer_base" pos="1.4 0.8 1.135">
             <geom  type="mesh" rgba="0.1 0.1 0.1 1" friction="0.8 0.8 0.8" mesh="drone" pos="0 0 -0.095"/>
             <joint name="robot1_flying_base_joint_Z" pos="0 0 0" axis="0 0 1" frictionloss="500" damping="50" type="slide" limited="true" range="-10 10" />
             <joint name="robot1_flying_base_joint_X" pos="0 0 0" axis="1 0 0" frictionloss="500" damping="50" type="slide" limited="true" range="-10 10" />
