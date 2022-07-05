@@ -33,12 +33,16 @@ class MJ_Controller():
 
         # Always create the services at the end so all necessary variables exist when they are called
         cls.motor_registration_service = rospy.Service('register_motor_group', RegisterGroup, cls.register_motor_group)
+
+        cls.sim_started = False
         cls.start_sim_service = rospy.Service('start_sim', Trigger, cls.start_sim)
 
         print('Waiting for subsystems to register...')
 
     @classmethod
     def handle_update(cls, data, ids):
+        if not cls.sim_started:
+            return
         # Set the actuator velocities to the desired velocities from the controllers
         for id, pos in zip(ids, data.data):
             cls.control[id] = pos
@@ -84,6 +88,9 @@ class MJ_Controller():
         sys.stdout.write('\033[F\033[K')
         print('\r' + colored('Starting simulation... ', color='yellow'), end='', flush=True)
         print(colored('STARTED', color='green'))
+
+        cls.sim_started = True
+
         return TriggerResponse(success=True)
 
     @classmethod

@@ -1,7 +1,9 @@
 {
-    "ur5a_arm": [0, 1, 2, 3, 4, 5, 6],
+    "ur5a_arm": [0, 1, 2, 3, 4, 5],
+    "ur5a_gripper": [6],
     "ur5a_rail": [7],
-    "ur5b_arm": [8, 9, 10, 11, 12, 13, 14],
+    "ur5b_arm": [8, 9, 10, 11, 12, 13],
+    "ur5b_gripper": [14],
     "ur5b_rail": [15],
     "free_flyer": [16, 17, 18],
     "free_flyer_arm": [19]
