@@ -33,6 +33,8 @@ class MJ_Controller():
 
         # Always create the services at the end so all necessary variables exist when they are called
         cls.motor_registration_service = rospy.Service('register_motor_group', RegisterGroup, cls.register_motor_group)
+        cls.airflow_on_service = rospy.Service('airflow_on', Trigger, cls.airflow_on)
+        cls.airflow_off_service = rospy.Service('airflow_off', Trigger, cls.airflow_off)
 
         cls.sim_started = False
         cls.start_sim_service = rospy.Service('start_sim', Trigger, cls.start_sim)
@@ -103,6 +105,18 @@ class MJ_Controller():
 
         cls.sim.step()
         cls.viewer.render()
+
+    @classmethod
+    def airflow_on(cls, req: Trigger):
+        cls.model.body_pos[3] = [0, 1.25, 1.8]
+        cls.model.body_pos[2] = [0, 1.18, 1.8]
+        return TriggerResponse(success=True)
+
+    @classmethod
+    def airflow_off(cls, req: Trigger):
+        cls.model.body_pos[2] = [0, 1.25, 1.8]
+        cls.model.body_pos[3] = [0, 1.18, 1.8]
+        return TriggerResponse(success=True)
 
 
 if __name__ == '__main__':
