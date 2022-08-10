@@ -22,6 +22,10 @@ class MJ_Controller():
         path = os.path.realpath(__file__)
         path = str(Path(path).parent.parent.parent)
 
+        print(colored('Note: if a missing GLEW error is throw, execute with your paths to set: \n{}'.format(
+            'export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGLEW.so:/usr/lib/x86_64-linux-gnu/libGL.so'),
+            color='yellow'))
+
         print(colored('Loading UR5 model...', color='yellow'), end='')
         cls.model = mp.load_model_from_path(os.path.join(
             rospkg.RosPack().get_path('mj_controller'), 'UR5+gripper', 'UR5gripper_2_finger.xml'))
